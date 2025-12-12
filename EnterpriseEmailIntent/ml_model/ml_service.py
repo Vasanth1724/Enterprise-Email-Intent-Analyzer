@@ -1,11 +1,14 @@
 from fastapi import FastAPI
 import joblib
 import re
+import os
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 app = FastAPI()
 
-model = joblib.load("email_intent_model.pkl")
-tfidf = joblib.load("email_tfidf.pkl")
+model = joblib.load(os.path.join(BASE_DIR, "email_intent_model.pkl"))
+tfidf = joblib.load(os.path.join(BASE_DIR, "email_tfidf.pkl"))
 
 def clean(t):
     t = t.lower()
