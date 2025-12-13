@@ -15,22 +15,30 @@ public class MlService {
     @Autowired
     private EmailPredictionRepository repo;
 
+    private final RestTemplate rest = new RestTemplate();
+
     public Map<String, Object> predict(String text) {
 
-        RestTemplate rest = new RestTemplate();
+        // 1️⃣ Read ML URL from environment
+        String mlUrl = System.getenv("ML_URL");
 
-        // Request body for ML API
+        if (mlUrl == null) {
+            throw new RuntimeException("ML_URL environment variable not set");
+        }
+
+        // 2️⃣ Request body
         Map<String, String> req = new HashMap<>();
         req.put("text", text);
 
-        // Call FastAPI ML service
-        Map<String, Object> response = rest.postForObject(
-                "http://localhost:8001/predict",
-                req,
-                Map.class
-        );
+        // 3️⃣ Call FastAPI ML service
+        Map<String, Object> response =
+                rest.postForObject(mlUrl, req, Map.class);
 
-        // Save to database
+        if (response == null) {
+            throw new RuntimeException("ML service returned null response");
+        }
+
+        // 4️⃣ Save prediction to DB
         EmailPrediction ep = new EmailPrediction();
         ep.setEmailText(text);
         ep.setIntent(response.get("intent").toString());
@@ -40,7 +48,7 @@ public class MlService {
 
         repo.save(ep);
 
-        // Return ML result to controller
+        // 5️⃣ Return response to controller
         return response;
     }
 }
