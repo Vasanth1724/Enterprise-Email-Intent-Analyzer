@@ -3,6 +3,7 @@ package com.enterprise.email.service;
 import com.enterprise.email.model.EmailPrediction;
 import com.enterprise.email.repository.EmailPredictionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -17,10 +18,11 @@ public class MlService {
 
     private final RestTemplate rest = new RestTemplate();
 
+    @Value("${ml.url}")
+    private String mlUrl;
+
     public Map<String, Object> predict(String text) {
 
-        // 1️⃣ Read ML URL from environment
-        String mlUrl = System.getenv("ML_URL");
 
         if (mlUrl == null) {
             throw new RuntimeException("ML_URL environment variable not set");
